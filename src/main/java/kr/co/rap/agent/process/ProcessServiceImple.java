@@ -15,7 +15,12 @@ public class ProcessServiceImple implements ProcessService {
 
     @Override
     public void executeManufacture(ManufactureInfo manufactureInfo) {
+        Thread thread = new Thread(new Runnable() {
+            @Override
+            public void run() {
 
+            }
+        });
     }
 
     @Override
