@@ -30,6 +30,8 @@ public class ProcessController {
         responseInfo.put("code", "200");
         responseInfo.put("mesaage", "그거면 됐습니다..");
 
+        System.out.println("Controller was run");
+
         return responseInfo;
     }
 }

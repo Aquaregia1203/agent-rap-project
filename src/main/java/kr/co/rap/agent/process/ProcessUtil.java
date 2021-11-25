@@ -1,6 +1,7 @@
 package kr.co.rap.agent.process;
 
 import com.pi4j.io.gpio.*;
+import okhttp3.OkHttpClient;
 import org.springframework.stereotype.Component;
 
 import java.util.HashMap;
@@ -8,14 +9,21 @@ import java.util.Map;
 
 @Component
 public class ProcessUtil implements Runnable {
+    private Pin OUTPUT_GPIO_01 = RaspiPin.GPIO_01;
+    private GpioController controller = GpioFactory.getInstance();
+
     public void run() {
         executeManufacture(ProcessController.inputInfo);
+
+        System.out.println("Thread Run.");
     }
 
 
     public void executeManufacture(InputInfo inputInfo) {
         try {
             while (!viewContactSwitch()) {
+                System.out.println("View Switch");
+
                 controlLED(true);
                 Thread.sleep(500);
                 controlLED(false);
@@ -33,10 +41,10 @@ public class ProcessUtil implements Runnable {
                 continue;
             }
 
-            Map<String, Integer> product = new HashMap<String, Integer>();
-            product.put("productWeight", productWeight);
+            Map<String, Integer> productInfo = new HashMap<String, Integer>();
+            productInfo.put("productWeight", productWeight);
 
-            sendProductInfo(product);
+            sendProductInfo(productInfo);
 
             controlLED(false);
 
@@ -49,6 +57,7 @@ public class ProcessUtil implements Runnable {
     public Map<String, String> receiveManufacture(InputInfo inputInfo) {
         System.out.println("확인");
         System.out.println(inputInfo.getPumpInfo());
+
         return null;
     }
 
@@ -62,11 +71,8 @@ public class ProcessUtil implements Runnable {
     }
 
     public void controlLED(boolean LEDStatus) {
-        final Pin OUTPUT_GPIO_01 = RaspiPin.GPIO_01;
-        final GpioController controller = GpioFactory.getInstance();
-
         try {
-            final GpioPinDigitalOutput pin =
+            GpioPinDigitalOutput pin =
                     controller.provisionDigitalOutputPin(OUTPUT_GPIO_01,
                             "LED", PinState.LOW);
 
@@ -79,8 +85,6 @@ public class ProcessUtil implements Runnable {
             }
         } catch (Exception e) {
             e.printStackTrace();
-        } finally {
-            controller.shutdown();
         }
     }
 
@@ -89,6 +93,15 @@ public class ProcessUtil implements Runnable {
     }
 
     public void sendProductInfo(Map<String, Integer> productInfo) {
+        OkHttpClient okhttpClient = new OkHttpClient();
+
+        StringBuffer body = new StringBuffer();
+
+        body.append("{")
+            .append("\"productWeight\" : ")
+            .append(productInfo.get("productWeight") + "")
+            .append("}");
+
 
     }
 }
