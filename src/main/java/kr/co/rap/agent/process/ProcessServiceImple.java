@@ -1,6 +1,6 @@
 package kr.co.rap.agent.process;
 
-import kr.co.rap.agent.util.InputInfo;
+import com.pi4j.io.gpio.*;
 import org.springframework.stereotype.Service;
 
 import java.util.Map;
@@ -37,8 +37,28 @@ public class ProcessServiceImple implements ProcessService {
 
     @Override
     public void controlLED(boolean LEDStatus) {
+        final Pin OUTPUT_GPIO_01 = RaspiPin.GPIO_01;
+        final GpioController controller = GpioFactory.getInstance();
+            try {
+                final GpioPinDigitalOutput pin =
+                        controller.provisionDigitalOutputPin(OUTPUT_GPIO_01,
+                                "LED", PinState.LOW);
 
-    }
+                for (int i = 0; i < 10; i ++) {
+                    pin.high();
+                    Thread.sleep(500);
+
+                    pin.low();
+                    Thread.sleep(500);
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            } finally {
+                controller.shutdown();
+            }
+        }
+
+
 
     @Override
     public int measureProductWeight() {

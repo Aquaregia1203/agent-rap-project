@@ -1,4 +1,4 @@
-package kr.co.rap.agent.util;
+package kr.co.rap.agent.process;
 
 import java.io.Serializable;
 import java.util.List;
