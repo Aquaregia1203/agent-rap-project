@@ -1,6 +1,6 @@
 package kr.co.rap.agent.process;
 
-import kr.co.rap.agent.model.ManufactureInfo;
+import kr.co.rap.agent.util.InputInfo;
 import org.springframework.stereotype.Service;
 
 import java.util.Map;
@@ -9,12 +9,14 @@ import java.util.Map;
 public class ProcessServiceImple implements ProcessService {
 
     @Override
-    public Map<String, String> receiveManufacture(ManufactureInfo manufactureInfo) {
+    public Map<String, String> receiveManufacture(InputInfo inputInfo) {
+        System.out.println("확인");
+        System.out.println(inputInfo.getPumpInfo());
         return null;
     }
 
     @Override
-    public void executeManufacture(ManufactureInfo manufactureInfo) {
+    public void executeManufacture(InputInfo inputInfo) {
         Thread thread = new Thread(new Runnable() {
             @Override
             public void run() {
@@ -29,7 +31,7 @@ public class ProcessServiceImple implements ProcessService {
     }
 
     @Override
-    public void controlPump(ManufactureInfo manufactureInfo) {
+    public void controlPump(InputInfo inputInfo) {
 
     }
 

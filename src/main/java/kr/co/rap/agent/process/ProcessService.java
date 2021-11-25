@@ -1,19 +1,19 @@
 package kr.co.rap.agent.process;
 
-import kr.co.rap.agent.model.ManufactureInfo;
+import kr.co.rap.agent.util.InputInfo;
 import org.springframework.stereotype.Service;
 
 import java.util.Map;
 
 @Service
 public interface ProcessService {
-    public Map<String, String> receiveManufacture(ManufactureInfo manufactureInfo);
+    public Map<String, String> receiveManufacture(InputInfo inputInfo);
 
-    public void executeManufacture(ManufactureInfo manufactureInfo);
+    public void executeManufacture(InputInfo inputInfo);
 
     public boolean viewContactSwitch();
 
-    public void controlPump(ManufactureInfo manufactureInfo);
+    public void controlPump(InputInfo inputInfo);
 
     public void controlLED(boolean LEDStatus);
 

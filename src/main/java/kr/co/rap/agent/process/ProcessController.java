@@ -1,6 +1,6 @@
 package kr.co.rap.agent.process;
 
-import kr.co.rap.agent.model.ManufactureInfo;
+import kr.co.rap.agent.util.InputInfo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -13,7 +13,8 @@ public class ProcessController {
     private ProcessService processService;
 
     @PostMapping(value = "/manufacture-execute-info", consumes = MediaType.APPLICATION_JSON_UTF8_VALUE)
-    public void reciveManufactureInfo(@RequestBody ManufactureInfo manufactureInfo) {
-        processService.executeManufacture(manufactureInfo);
+    public void reciveManufactureInfo(@RequestBody InputInfo inputInfo) {
+        System.out.println(inputInfo.getPumpInfo());
+        processService.receiveManufacture(inputInfo);
     }
 }
