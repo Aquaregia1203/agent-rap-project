@@ -4,7 +4,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.Map;
 
-@Service
 public interface ProcessService {
     public Map<String, String> receiveManufacture(InputInfo inputInfo);
 

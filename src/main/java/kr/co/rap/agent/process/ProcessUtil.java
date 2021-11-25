@@ -3,24 +3,55 @@ package kr.co.rap.agent.process;
 import com.pi4j.io.gpio.*;
 import org.springframework.stereotype.Component;
 
+import java.util.HashMap;
 import java.util.Map;
 
 @Component
-public class ProcessUtil {
+public class ProcessUtil implements Runnable {
+    public void run() {
+        executeManufacture(ProcessController.inputInfo);
+    }
+
+
+    public void executeManufacture(InputInfo inputInfo) {
+        try {
+            while (!viewContactSwitch()) {
+                controlLED(true);
+                Thread.sleep(500);
+                controlLED(false);
+            }
+
+            controlPump(inputInfo);
+
+            Thread.sleep(10000);
+
+            int productWeight = measureProductWeight();
+
+            controlLED(true);
+
+            while (viewContactSwitch()) {
+                continue;
+            }
+
+            Map<String, Integer> product = new HashMap<String, Integer>();
+            product.put("productWeight", productWeight);
+
+            sendProductInfo(product);
+
+            controlLED(false);
+
+            inputInfo = null;
+        } catch (Exception e) {
+
+        }
+    }
+
     public Map<String, String> receiveManufacture(InputInfo inputInfo) {
         System.out.println("확인");
         System.out.println(inputInfo.getPumpInfo());
         return null;
     }
 
-    public void executeManufacture(InputInfo inputInfo) {
-        Thread thread = new Thread(new Runnable() {
-            @Override
-            public void run() {
-
-            }
-        });
-    }
 
     public boolean viewContactSwitch() {
         return false;

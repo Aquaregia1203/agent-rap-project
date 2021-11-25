@@ -12,8 +12,7 @@ import java.util.Map;
 
 @RestController
 public class ProcessController {
-    @Autowired
-    private ProcessServiceImple processService;
+    public static InputInfo inputInfo;
 
 //    @GetMapping(value = "/go")
 //    public void executeLED() {
@@ -22,10 +21,10 @@ public class ProcessController {
 
     @PostMapping(value = "/manufacture-execute-info")
     public Map<String, String> reciveManufactureInfo(@RequestBody InputInfo inputInfo) {
-        boolean result = processService.executeManufacture(inputInfo);
+        ProcessController.inputInfo = inputInfo;
 
-//        System.out.println(inputInfo.getPumpInfo());
-//        processService.receiveManufacture(inputInfo);
+        Thread manufacture = new Thread(new ProcessUtil());
+        manufacture.start();
 
         Map<String, String> responseInfo = new HashMap<String, String>();
         responseInfo.put("code", "200");
