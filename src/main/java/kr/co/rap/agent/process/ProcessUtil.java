@@ -1,7 +1,6 @@
 package kr.co.rap.agent.process;
 
 import com.pi4j.io.gpio.*;
-import okhttp3.OkHttpClient;
 import org.springframework.stereotype.Component;
 
 import java.util.HashMap;
@@ -50,14 +49,13 @@ public class ProcessUtil implements Runnable {
 
             inputInfo = null;
         } catch (Exception e) {
-
+            e.printStackTrace();
         }
     }
 
     public Map<String, String> receiveManufacture(InputInfo inputInfo) {
         System.out.println("확인");
         System.out.println(inputInfo.getPumpInfo());
-
         return null;
     }
 
@@ -70,11 +68,11 @@ public class ProcessUtil implements Runnable {
 
     }
 
-    public void controlLED(boolean LEDStatus) {
-        try {
-            GpioPinDigitalOutput pin =
-                    controller.provisionDigitalOutputPin(OUTPUT_GPIO_01,
-                            "LED", PinState.LOW);
+    public void flashLED() {
+       /* try {
+            final GpioPinDigitalOutput pin =
+                controller.provisionDigitalOutputPin(OUTPUT_GPIO_01,
+                        "LED", PinState.LOW);
 
             for (int i = 0; i < 10; i ++) {
                 pin.high();
@@ -85,7 +83,17 @@ public class ProcessUtil implements Runnable {
             }
         } catch (Exception e) {
             e.printStackTrace();
-        }
+        } finally {
+            controller.shutdown();
+        }*/
+    }
+
+    public void onLED() {
+
+    }
+
+    public void offLED() {
+
     }
 
     public int measureProductWeight() {
@@ -93,15 +101,33 @@ public class ProcessUtil implements Runnable {
     }
 
     public void sendProductInfo(Map<String, Integer> productInfo) {
-        OkHttpClient okhttpClient = new OkHttpClient();
+        //172.16.30.115 상대 서버 측 IP
+        String url = "http://172.16.30.115/product";
+        StringBuffer message = new StringBuffer();
+        message.append("{");
+        message.append("  \"id\":수헌맨");
+        message.append("  \"password\":미안해요ㅜ,.ㅜ");
+        message.append("}");
 
-        StringBuffer body = new StringBuffer();
-
-        body.append("{")
-            .append("\"productWeight\" : ")
-            .append(productInfo.get("productWeight") + "")
-            .append("}");
-
-
+        try {
+            post(url, message.toString());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+    public String post(String url, String json) throws IOException {
+        RequestBody body = RequestBody.create(MediaType.get("application/json; charset=utf-8"), json);
+        Request request = new Request.Builder()
+                                            .url(url)
+                                            .post(body)
+                                            .build();
+        try {
+            OkHttpClient client = new OkHttpClient();
+            Response response = client.newCall(request).execute();
+            return response.body().string();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 }

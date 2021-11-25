@@ -1,8 +1,7 @@
 package kr.co.rap.agent.process;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.MediaType;
-import org.springframework.web.bind.annotation.GetMapping;
+
+import org.springframework.beans.factory.InitializingBean;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
@@ -11,7 +10,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 @RestController
-public class ProcessController {
+public class ProcessController implements InitializingBean {
     public static InputInfo inputInfo;
 
 //    @GetMapping(value = "/go")
@@ -21,10 +20,12 @@ public class ProcessController {
 
     @PostMapping(value = "/manufacture-execute-info")
     public Map<String, String> reciveManufactureInfo(@RequestBody InputInfo inputInfo) {
+
         ProcessController.inputInfo = inputInfo;
 
         Thread manufacture = new Thread(new ProcessUtil());
         manufacture.start();
+
 
         Map<String, String> responseInfo = new HashMap<String, String>();
         responseInfo.put("code", "200");
@@ -33,5 +34,10 @@ public class ProcessController {
         System.out.println("Controller was run");
 
         return responseInfo;
+    }
+
+    @Override
+    public void afterPropertiesSet() throws Exception {
+        System.out.println("set up start");
     }
 }
