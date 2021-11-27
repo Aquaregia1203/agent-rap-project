@@ -27,6 +27,22 @@
             <scope>test</scope>
         </dependency>
         <dependency>
+            <groupId>com.diozero</groupId>
+            <artifactId>diozero-core</artifactId>
+            <version>0.11</version>
+        </dependency>
+        <dependency>
+            <groupId>com.diozero</groupId>
+            <artifactId>diozero-provider-wiringpi</artifactId>
+            <version>0.11</version>
+        </dependency>
+        <dependency>
+            <groupId>com.pi4j</groupId>
+            <artifactId>pi4j-parent</artifactId>
+            <version>1.2</version>
+            <type>pom</type>
+        </dependency>
+        <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-context</artifactId>
             <version>5.2.18.RELEASE</version>
