@@ -1,17 +1,13 @@
 package kr.co.rap.agent.process;
 
 
-import org.springframework.beans.factory.InitializingBean;
 import org.springframework.scheduling.annotation.Async;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.io.BufferedOutputStream;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.nio.charset.StandardCharsets;
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -30,18 +26,25 @@ public class ProcessController {
             pumpNoAndInput.append(info.get("pumpNo"))
                           .append(":")
                           .append(info.get("input"))
-                          .append("\r\n");
+                          .append("@");
         }
 
-        File file = new File("C://java/test.txt");
-        BufferedOutputStream bufferedOutputStream = null;
+        BufferedReader bufferedReader = null;
 
         try {
-            bufferedOutputStream = new BufferedOutputStream(
-                                      new FileOutputStream(file));
+            String command = "echo \"" + pumpNoAndInput + "\" > /home/pi/led/led.txt";
 
-            bufferedOutputStream.write(pumpNoAndInput.toString().getBytes(StandardCharsets.UTF_8));
+            Process process = Runtime.getRuntime().exec(command);
+            bufferedReader = new BufferedReader(new InputStreamReader(process.getInputStream()));
 
+            String line = null;
+            while ((line = bufferedReader.readLine()) != null) {
+                System.out.println(line);
+            }
+
+            process.waitFor();
+            System.out.println("exit: " + process.exitValue());
+            process.destroy();
         } catch (Exception e) {
             responseInfo.put("code", "300");
             responseInfo.put("message", "생산 요청에 실패하였습니다.");
@@ -49,8 +52,8 @@ public class ProcessController {
             return responseInfo;
         } finally {
             try {
-                if (bufferedOutputStream != null) {
-                    bufferedOutputStream.close();
+                if (bufferedReader != null) {
+                    bufferedReader.close();
                 }
             } catch (Exception e) {
                 responseInfo.put("code", "300");
