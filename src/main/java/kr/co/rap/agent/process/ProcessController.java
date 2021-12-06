@@ -6,8 +6,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
+import java.io.File;
+import java.io.FileWriter;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -17,6 +17,7 @@ public class ProcessController {
     @Async
     @PostMapping(value = "/manufacture-execute-info")
     public Map<String, String> reciveInputInfo(@RequestBody InputInfo inputInfo) {
+        FileWriter fileWriter = null;
         Map<String, String> responseInfo = new HashMap<String, String>();
 
         List<Map<String, String>> pumpInfo = inputInfo.getPumpInfo();
@@ -29,22 +30,10 @@ public class ProcessController {
                           .append("@");
         }
 
-        BufferedReader bufferedReader = null;
-
         try {
-            String command = "echo \"" + pumpNoAndInput + "\" > /home/pi/led/led.txt";
-
-            Process process = Runtime.getRuntime().exec(command);
-            bufferedReader = new BufferedReader(new InputStreamReader(process.getInputStream()));
-
-            String line = null;
-            while ((line = bufferedReader.readLine()) != null) {
-                System.out.println(line);
-            }
-
-            process.waitFor();
-            System.out.println("exit: " + process.exitValue());
-            process.destroy();
+            fileWriter = new FileWriter(new File("/home/pi/led/led.txt"));
+            fileWriter.write(pumpNoAndInput.toString());
+            fileWriter.flush();
         } catch (Exception e) {
             responseInfo.put("code", "300");
             responseInfo.put("message", "생산 요청에 실패하였습니다.");
@@ -52,8 +41,8 @@ public class ProcessController {
             return responseInfo;
         } finally {
             try {
-                if (bufferedReader != null) {
-                    bufferedReader.close();
+                if (fileWriter != null) {
+                    fileWriter.close();
                 }
             } catch (Exception e) {
                 responseInfo.put("code", "300");
