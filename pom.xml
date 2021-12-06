@@ -98,8 +98,8 @@
         </dependency>
         <dependency>
             <groupId>com.diozero</groupId>
-            <artifactId>diozero-provider-wiringpi</artifactId>
-            <version>0.11</version>
+            <artifactId>diozero-core</artifactId>
+            <version>1.2.3</version>
         </dependency>
         <dependency>
             <groupId>com.pi4j</groupId>
@@ -121,6 +121,11 @@
             <groupId>com.pi4j</groupId>
             <artifactId>pi4j-device</artifactId>
             <version>1.1</version>
+        </dependency>
+        <dependency>
+            <groupId>com.squareup.okhttp3</groupId>
+            <artifactId>okhttp</artifactId>
+            <version>4.9.2</version>
         </dependency>
     </dependencies>
 
