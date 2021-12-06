@@ -96,6 +96,32 @@
             <artifactId>log4j-api</artifactId>
             <version>2.14.0</version>
         </dependency>
+        <dependency>
+            <groupId>com.diozero</groupId>
+            <artifactId>diozero-provider-wiringpi</artifactId>
+            <version>0.11</version>
+        </dependency>
+        <dependency>
+            <groupId>com.pi4j</groupId>
+            <artifactId>pi4j-parent</artifactId>
+            <version>1.2</version>
+            <type>pom</type>
+        </dependency>
+        <dependency>
+            <groupId>com.pi4j</groupId>
+            <artifactId>pi4j-core</artifactId>
+            <version>1.1</version>
+        </dependency>
+        <dependency>
+            <groupId>com.pi4j</groupId>
+            <artifactId>pi4j-gpio-extension</artifactId>
+            <version>1.1</version>
+        </dependency>
+        <dependency>
+            <groupId>com.pi4j</groupId>
+            <artifactId>pi4j-device</artifactId>
+            <version>1.1</version>
+        </dependency>
     </dependencies>
 
     <build>
