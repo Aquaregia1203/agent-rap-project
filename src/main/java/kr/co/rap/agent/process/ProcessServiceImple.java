@@ -4,6 +4,8 @@ import com.pi4j.component.motor.impl.GpioStepperMotorComponent;
 import com.pi4j.io.gpio.*;
 import com.pi4j.io.gpio.event.GpioPinDigitalStateChangeEvent;
 import com.pi4j.io.gpio.event.GpioPinListenerDigital;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -12,8 +14,7 @@ import java.io.InputStreamReader;
 import java.util.*;
 
 public class ProcessServiceImple implements ProcessService {
-    private ProcessMapperImple processMapperImple;
-
+    private final static Logger logger = LogManager.getLogger(ProcessServiceImple.class);
     private final static GpioController gpioController = GpioFactory.getInstance();
 
     private final static GpioPinDigitalOutput[][] PINS_MOTOR = {
@@ -43,23 +44,27 @@ public class ProcessServiceImple implements ProcessService {
 
     private final static GpioPinDigitalOutput PIN_LED = gpioController.provisionDigitalOutputPin(RaspiPin.GPIO_01, PinState.LOW);
 
-    private static boolean switchStatus = false;
+    private final Hx711 hx711 = new Hx711(gpioController.provisionDigitalInputPin(RaspiPin.GPIO_15),
+            gpioController.provisionDigitalOutputPin(RaspiPin.GPIO_16), 5000, 1.0, GainFactor.GAIN_128);
+    private static boolean contactSwitchStatus = false;
 
     public ProcessServiceImple(ProcessMapperImple processMapperImple) {
         this.processMapperImple = processMapperImple;
     }
 
-    public static boolean getSwitchStatus() {
-        return switchStatus;
+    public static boolean getContactSwitchStatus() {
+        return contactSwitchStatus;
     }
 
-    public static void setSwitchStatus(boolean switchStatus) {
-        ProcessServiceImple.switchStatus = switchStatus;
+    public static void setContactSwitchStatus(boolean contactSwitchStatus) {
+        ProcessServiceImple.contactSwitchStatus = contactSwitchStatus;
     }
 
     public static GpioController getGpioController() {
         return gpioController;
     }
+
+    private ProcessMapperImple processMapperImple;
 
     @Override
     public List<Map<String, String>> textMapping() {
@@ -68,7 +73,7 @@ public class ProcessServiceImple implements ProcessService {
         List<Map<String, String>> pumpInfos = null;
 
         try {
-            File file = new File("/home/pi/led/led.txt");
+            File file = new File("/home/pi/process/process-info.txt");
 
             bufferedReader = new BufferedReader(new InputStreamReader(new FileInputStream(file)));
 
@@ -93,19 +98,62 @@ public class ProcessServiceImple implements ProcessService {
 
     @Override
     public void executeManufacture(InputInfo inputInfo) throws Exception {
-        final Hx711 hx711 = new Hx711(gpioController.provisionDigitalInputPin(RaspiPin.GPIO_15), gpioController.provisionDigitalOutputPin(RaspiPin.GPIO_16), 5000, 1.0, GainFactor.GAIN_128);
-        hx711.measureAndSetTare();
+        logger.info("  《 Manufacture Start 》 ");
+        logger.info("------------------------------");
+        int count = 0;
+        while (true) {
+            if (count == 60) {
+                Map<String, Integer> product = new HashMap<String, Integer>();
+                product.put("productWeight", 0);
+                product.put("code", 101);
+                processMapperImple.sendProductInfo(product);
 
-        controlPump(inputInfo);
+                return;
+            }
+
+            if ((viewContactSwitch())) {
+                break;
+
+            } else {
+
+                controlLED(true);
+                Thread.sleep(500);
+
+                controlLED(false);
+                Thread.sleep(500);
+                count++;
+
+                continue;
+            }
+        }
 
         Thread.sleep(5000);
+        hx711.measureAndSetTare();
+
+        logger.info("  《 Pump Control Start 》 ");
+        logger.info("------------------------------");
+
+        controlPump(inputInfo);
+        Thread.sleep(5000);
+
+
+        logger.info("  《 Measure Product Weight 》 ");
+        logger.info("------------------------------");
 
         int productWeight = measureProductWeight(hx711);
-
         Thread.sleep(1000);
+
+        logger.info("  《 Measure Termination 》 ");
+        logger.info("   Actual Product Weight : " + productWeight + "g");
+        logger.info("------------------------------");
+
 
         controlLED(true);
         Thread.sleep(500);
+
+        logger.info("         《 LED ON 》 ");
+        logger.info("------------------------------");
+
 
         while (true) {
             if (!(viewContactSwitch())) {
@@ -116,31 +164,38 @@ public class ProcessServiceImple implements ProcessService {
 
         Map<String, Integer> product = new HashMap<String, Integer>();
         product.put("productWeight", productWeight);
+        product.put("code", 200);
+
         processMapperImple.sendProductInfo(product);
+        logger.info("  《 Send Production Infomation 》 ");
+        logger.info("   Actual Product Weight : " + productWeight);
+        logger.info("------------------------------");
         Thread.sleep(500);
 
         controlLED(false);
+        logger.info("        《 LED OFF 》 ");
+        logger.info("------------------------------");
+
+        logger.info("  《 Manufacture Finish 》 ");
+        logger.info("------------------------------");
     }
 
     @Override
     public boolean viewContactSwitch() {
-        try {
             PIN_SWITCH.addListener(new GpioPinListenerDigital() {
                 @Override
                 public void handleGpioPinDigitalStateChangeEvent(GpioPinDigitalStateChangeEvent event) {
                     PinState pinState = event.getState();
-                    //스위치가 눌려 있는지? 눌렸다면 LOW 아닌경우 HIGH
+
                     if ("LOW".equals(pinState.toString())) {
-                        setSwitchStatus(true);
+                        setContactSwitchStatus(true);
                     } else {
-                        setSwitchStatus(false);
+                        setContactSwitchStatus(false);
                     }
                 }
             });
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return switchStatus;
+
+        return getContactSwitchStatus();
     }
 
     @Override
@@ -162,37 +217,35 @@ public class ProcessServiceImple implements ProcessService {
             motors[i].setStepSequence(double_step_sequence);
         }
 
+        Long motorSecond = 0l;
         for (int i = 0; i < pumpInfo.size(); i++) {
             Iterator<String> pump = pumpInfo.get(i).keySet().iterator();
             String pumpNo = pump.next();
 
             if ((Integer.valueOf(pumpNo) == 1)) {
-                motors[(Integer.valueOf(pumpNo) - 1)].step(123);
+                motors[(Integer.valueOf(pumpNo) - 1)].step(103);
 
-                Long twoMotorSec = (long) (((Double.valueOf(pumpInfo.get(i).get(pumpNo)) -7.6) / 15.45) * 1000);
-                System.out.println("twoMotorSec = " + twoMotorSec);
-                Thread.sleep(twoMotorSec);
+                motorSecond = (long) (((Double.valueOf(pumpInfo.get(i).get(pumpNo)) -7.6) / 17.50) * 1000);
+                Thread.sleep(motorSecond);
 
 
-                motors[(Integer.valueOf(pumpNo) - 1)].step(-123);
+                motors[(Integer.valueOf(pumpNo) - 1)].step(-103);
                 Thread.sleep(1000);
             } else if ((Integer.valueOf(pumpNo) == 2)) {
-                motors[(Integer.valueOf(pumpNo) - 1)].step(-150);
+                motors[(Integer.valueOf(pumpNo) - 1)].step(-130);
 
-                Long twoMotorSec = (long) (((Double.valueOf(pumpInfo.get(i).get(pumpNo)) -7.6) / 15.45) * 1000);
-                System.out.println("twoMotorSec = " + twoMotorSec);
-                Thread.sleep(twoMotorSec);
+                motorSecond = (long) (((Double.valueOf(pumpInfo.get(i).get(pumpNo)) -7.6) / 29.00) * 1000);
+                Thread.sleep(motorSecond);
 
-                motors[(Integer.valueOf(pumpNo) - 1)].step(150);
+                motors[(Integer.valueOf(pumpNo) - 1)].step(130);
                 Thread.sleep(1000);
             } else if ((Integer.valueOf(pumpNo) == 3)) {
-                motors[(Integer.valueOf(pumpNo) - 1)].step(-150);
+                motors[(Integer.valueOf(pumpNo) - 1)].step(-127);
 
-                Long twoMotorSec = (long) (((Double.valueOf(pumpInfo.get(i).get(pumpNo)) -7.6) / 15.45) * 1000);
-                System.out.println("twoMotorSec = " + twoMotorSec);
-                Thread.sleep(twoMotorSec);
+                motorSecond = (long) (((Double.valueOf(pumpInfo.get(i).get(pumpNo)) - 10) / 22.35) * 1000);
+                Thread.sleep(motorSecond);
 
-                motors[(Integer.valueOf(pumpNo) - 1)].step(150);
+                motors[(Integer.valueOf(pumpNo) - 1)].step(127);
                 Thread.sleep(1000);
             }
         }
@@ -200,24 +253,22 @@ public class ProcessServiceImple implements ProcessService {
 
     @Override
     public void controlLED(boolean status) {
-        try {
-            if (status) {
-                // LED점등
-                PIN_LED.high();
-            } else {
-                // LED소등
-                PIN_LED.low();
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
+        if (status) {
+            PIN_LED.high();
+        } else {
+            PIN_LED.low();
         }
     }
 
     @Override
     public int measureProductWeight(Hx711 hx711) throws Exception {
-        //무게 값 측정
-        long value = hx711.measure();
-        System.out.println("value = " + value);
-        return (int) value;
+        long value = 0;
+        for (int i = 0; i < 10; i++) {
+            value += hx711.measure();
+            Thread.sleep(250);
+        }
+
+
+        return (int) ((value / 10) * -1 );
     }
 }

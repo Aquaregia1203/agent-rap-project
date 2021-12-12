@@ -25,13 +25,13 @@ public class ProcessController {
 
         for (Map info : pumpInfo) {
             pumpNoAndInput.append(info.get("pumpNo"))
-                          .append(":")
-                          .append(info.get("input"))
-                          .append("@");
+                    .append(":")
+                    .append(info.get("input"))
+                    .append("@");
         }
 
         try {
-            fileWriter = new FileWriter(new File("/home/pi/led/led.txt"));
+            fileWriter = new FileWriter(new File("/home/pi/process/process-info.txt"));
             fileWriter.write(pumpNoAndInput.toString());
             fileWriter.flush();
         } catch (Exception e) {
@@ -51,7 +51,6 @@ public class ProcessController {
                 return responseInfo;
             }
         }
-
         responseInfo.put("code", "200");
 
         return responseInfo;
