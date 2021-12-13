@@ -16,8 +16,7 @@ public class WatchService {
     }
 
     public static void main(String[] args) {
-        ProcessMapperImple processMapperImple = new ProcessMapperImple();
-        WatchService watchService = new WatchService(new ProcessServiceImple(processMapperImple));
+        WatchService watchService = new WatchService(new ProcessServiceImple());
         watchService.watchService();
     }
 
@@ -55,6 +54,7 @@ public class WatchService {
                         logger.info("   First Pump :" + inputs.get(0).get("1"));
                         logger.info("   Second Pump :" + inputs.get(1).get("2"));
                         logger.info("   Third Pump :" + inputs.get(2).get("3"));
+                        logger.info("------------------------------");
 
                         processServiceImple.executeManufacture(inputInfo);
 

@@ -44,13 +44,9 @@ public class ProcessServiceImple implements ProcessService {
 
     private final static GpioPinDigitalOutput PIN_LED = gpioController.provisionDigitalOutputPin(RaspiPin.GPIO_01, PinState.LOW);
 
-    private final Hx711 hx711 = new Hx711(gpioController.provisionDigitalInputPin(RaspiPin.GPIO_15),
-            gpioController.provisionDigitalOutputPin(RaspiPin.GPIO_16), 5000, 1.0, GainFactor.GAIN_128);
+    private ProcessMapperImple processMapperImple = new ProcessMapperImple(gpioController.provisionDigitalInputPin(RaspiPin.GPIO_15),
+            gpioController.provisionDigitalOutputPin(RaspiPin.GPIO_16), 5000, 1.0, 24);
     private static boolean contactSwitchStatus = false;
-
-    public ProcessServiceImple(ProcessMapperImple processMapperImple) {
-        this.processMapperImple = processMapperImple;
-    }
 
     public static boolean getContactSwitchStatus() {
         return contactSwitchStatus;
@@ -63,8 +59,6 @@ public class ProcessServiceImple implements ProcessService {
     public static GpioController getGpioController() {
         return gpioController;
     }
-
-    private ProcessMapperImple processMapperImple;
 
     @Override
     public List<Map<String, String>> textMapping() {
@@ -128,7 +122,7 @@ public class ProcessServiceImple implements ProcessService {
         }
 
         Thread.sleep(5000);
-        hx711.measureAndSetTare();
+        processMapperImple.measureAndSetTare();
 
         logger.info("  《 Pump Control Start 》 ");
         logger.info("------------------------------");
@@ -140,7 +134,7 @@ public class ProcessServiceImple implements ProcessService {
         logger.info("  《 Measure Product Weight 》 ");
         logger.info("------------------------------");
 
-        int productWeight = measureProductWeight(hx711);
+        int productWeight = measureProductWeight(processMapperImple);
         Thread.sleep(1000);
 
         logger.info("  《 Measure Termination 》 ");
@@ -261,13 +255,12 @@ public class ProcessServiceImple implements ProcessService {
     }
 
     @Override
-    public int measureProductWeight(Hx711 hx711) throws Exception {
+    public int measureProductWeight(ProcessMapperImple processMapperImple) throws Exception {
         long value = 0;
         for (int i = 0; i < 10; i++) {
-            value += hx711.measure();
+            value += processMapperImple.measure();
             Thread.sleep(250);
         }
-
 
         return (int) ((value / 10) * -1 );
     }

@@ -15,5 +15,8 @@ public interface ProcessService {
 
     public void controlLED(boolean status);
 
-    public int measureProductWeight(Hx711 hx711) throws Exception;
+    public int measureProductWeight(ProcessMapperImple processMapperImple) throws Exception;
+
+
+
 }
