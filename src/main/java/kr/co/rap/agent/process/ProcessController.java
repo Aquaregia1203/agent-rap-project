@@ -45,10 +45,7 @@ public class ProcessController {
                     fileWriter.close();
                 }
             } catch (Exception e) {
-                responseInfo.put("code", "300");
-                responseInfo.put("message", "생산 요청에 실패하였습니다.");
-
-                return responseInfo;
+                e.printStackTrace();
             }
         }
         responseInfo.put("code", "200");
