@@ -120,7 +120,6 @@ public class ProcessMapperImple implements ProcessMapper {
     }
 
     public long measureAndSetTare() throws Exception {
-//        long tareValue = readValue();
         long result = 0;
         for (int i = 0; i < 10; i++) {
             result = result + readValue();

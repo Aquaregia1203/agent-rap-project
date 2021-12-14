@@ -94,6 +94,7 @@ public class ProcessServiceImple implements ProcessService {
     public void executeManufacture(InputInfo inputInfo) throws Exception {
         logger.info("  《 Manufacture Start 》 ");
         logger.info("------------------------------");
+
         int count = 0;
         while (true) {
             if (count == 60) {
@@ -134,7 +135,7 @@ public class ProcessServiceImple implements ProcessService {
         logger.info("  《 Measure Product Weight 》 ");
         logger.info("------------------------------");
 
-        int productWeight = measureProductWeight(processMapperImple);
+        int productWeight = measureProductWeight();
         Thread.sleep(1000);
 
         logger.info("  《 Measure Termination 》 ");
@@ -255,7 +256,7 @@ public class ProcessServiceImple implements ProcessService {
     }
 
     @Override
-    public int measureProductWeight(ProcessMapperImple processMapperImple) throws Exception {
+    public int measureProductWeight() throws Exception {
         long value = 0;
         for (int i = 0; i < 10; i++) {
             value += processMapperImple.measure();
