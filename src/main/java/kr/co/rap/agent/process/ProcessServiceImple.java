@@ -130,7 +130,6 @@ public class ProcessServiceImple implements ProcessService {
         controlPump(inputInfo);
         Thread.sleep(5000);
 
-
         logger.info("  《 Measure Product Weight 》 ");
         logger.info("------------------------------");
 
@@ -141,13 +140,11 @@ public class ProcessServiceImple implements ProcessService {
         logger.info("   Actual Product Weight : " + productWeight + "g");
         logger.info("------------------------------");
 
-
         controlLED(true);
         Thread.sleep(500);
 
         logger.info("         《 LED ON 》 ");
         logger.info("------------------------------");
-
 
         while (true) {
             if (!(viewContactSwitch())) {
@@ -188,7 +185,6 @@ public class ProcessServiceImple implements ProcessService {
                     }
                 }
             });
-
         return getContactSwitchStatus();
     }
 
@@ -221,7 +217,6 @@ public class ProcessServiceImple implements ProcessService {
 
                 motorSecond = (long) (((Double.valueOf(pumpInfo.get(i).get(pumpNo)) -7.6) / 17.50) * 1000);
                 Thread.sleep(motorSecond);
-
 
                 motors[(Integer.valueOf(pumpNo) - 1)].step(-103);
                 Thread.sleep(1000);

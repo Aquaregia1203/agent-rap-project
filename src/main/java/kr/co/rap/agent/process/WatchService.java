@@ -57,11 +57,11 @@ public class WatchService {
                         logger.info("------------------------------");
 
                         processServiceImple.executeManufacture(inputInfo);
-
-
                     }
                 }
-                if (!watchKey.reset()) { break; }
+                if (!watchKey.reset()) {
+                    break;
+                }
             }
         } catch (Exception e) {
             e.printStackTrace();

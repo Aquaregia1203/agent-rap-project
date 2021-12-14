@@ -4,7 +4,6 @@ import java.util.List;
 import java.util.Map;
 
 public interface ProcessService {
-
     public List<Map<String, String>> textMapping();
 
     public void executeManufacture(InputInfo inputInfo) throws Exception;
@@ -16,7 +15,4 @@ public interface ProcessService {
     public void controlLED(boolean status);
 
     public int measureProductWeight(ProcessMapperImple processMapperImple) throws Exception;
-
-
-
 }

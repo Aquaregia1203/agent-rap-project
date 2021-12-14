@@ -107,6 +107,7 @@ public class ProcessMapperImple implements ProcessMapper {
             pinSCK.setState(PinState.HIGH);
             count = count << 1;
             pinSCK.setState(PinState.LOW);
+
             if (pinDT.isHigh()) {
                 count++;
             }
